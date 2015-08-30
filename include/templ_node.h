@@ -1,7 +1,7 @@
 /* Dicto
  * templ_node.h
  *
- * Copyright (C) 2014 Gregory P. Hedger
+ * Copyright (C) 2015 Gregory P. Hedger
  * greg@hedgersoftware.com
  * 30329 112th Pl. SE
  * Auburn, WA 98092
