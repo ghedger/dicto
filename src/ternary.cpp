@@ -343,7 +343,7 @@ enum LEG
 
 // We're going to render into a buffer
 const int screenWidth = 80;
-const int screenHeight = 8;
+const int screenHeight = 16;
 static char _renderBuf [ screenWidth * screenHeight ];
 
 // printTraversal

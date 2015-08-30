@@ -38,6 +38,7 @@
 #include "templ_node.h"
 #include "ternary_tree.h"
 #include "heap_mgr.h"
+#include "log.h"
 
 using namespace std;
 
@@ -59,29 +60,21 @@ typedef unsigned char UCHAR;
 TNode * TernaryTree::insert( const char *pWord, TNode **ppNode )
 {
     TNode * pChild = NULL;
-#ifdef DEBUG
-    //            cout << "insert >>>>>" << endl;
-#endif
+    VERBOSE_LOG(LOG_DEBUG, "insert >>>>>" << endl );
     if( !( *ppNode ) )
     {
         *ppNode = allocNode( *pWord );
-#ifdef DEBUG
-        //                cout << "ALLOC" << endl;
-#endif
+        VERBOSE_LOG (LOG_DEBUG, "ALLOC" << endl );
     }
     if( tolower( *pWord ) < ( ( *ppNode )->getKey() ) )
     {
-#ifdef DEBUG
-        //                cout << "L: " << pWord;
-#endif
+        VERBOSE_LOG( LOG_DEBUG,  "L: " << pWord );
         insert( pWord, &( ( *ppNode )->_l ) );
         ( *ppNode )->getLeft()->setParent( ( *ppNode )->getParent() );
     }
     else if ( tolower( *pWord ) > ( *ppNode )->getKey() )
     {
-#ifdef DEBUG
-        //                cout << "R: " << pWord << endl;
-#endif
+        VERBOSE_LOG( LOG_DEBUG,  "R: " << pWord << endl );
         // Add a peer on the right
         insert( pWord, &( ( *ppNode )->_r ) );
         ( *ppNode )->getRight()->setParent( ( *ppNode )->getParent() );
@@ -91,35 +84,29 @@ TNode * TernaryTree::insert( const char *pWord, TNode **ppNode )
         // Is this the last letter (is there a char in the second position?)
         if( pWord[ 1 ] )
         {
-#ifdef DEBUG
-            //                    cout << "C: " << pWord << endl;
-#endif
+            VERBOSE_LOG( LOG_DEBUG,  "C: " << pWord << endl );
             pChild = insert( pWord + 1, &( ( *ppNode )->_c ) );
             pChild->setParent( *ppNode );
         }
         else
         {
             // Yep, last one...
-#ifdef DEBUG
-            cout << "T: " << pWord << endl;
-#endif
+            VERBOSE_LOG( LOG_DEBUG,  "T: " << pWord << endl );
             ( *ppNode )->setTerminator();
         }
     }
 
 
-#ifdef DEBUG
-    //            cout << "insert <<<<<" << endl;
+    VERBOSE_LOG( LOG_DEBUG,  "insert <<<<<" << endl );
     /*
-       cout << "" << endl;
-       cout << " K: " << ( *ppNode )->getKey();
-       cout << " L: " << ( *ppNode )->getLeft();
-       cout << " C: " << ( *ppNode )->getCenter();
-       cout << " R: " << ( *ppNode )->getRight();
-       cout << " P: " << ( *ppNode )->getParent();
-       cout << endl;
+       VERBOSE_LOG( LOG_DEBUG,  "" << endl );
+       VERBOSE_LOG( LOG_DEBUG,  " K: " << ( *ppNode )->getKey() );
+       VERBOSE_LOG( LOG_DEBUG,  " L: " << ( *ppNode )->getLeft() );
+       VERBOSE_LOG( LOG_DEBUG,  " C: " << ( *ppNode )->getCenter() );
+       VERBOSE_LOG( LOG_DEBUG,  " R: " << ( *ppNode )->getRight() );
+       VERBOSE_LOG( LOG_DEBUG,  " P: " << ( *ppNode )->getParent() );
+       VERBOSE_LOG( LOG_DEBUG,  endl );
      */
-#endif
 
     return *ppNode;
 };
@@ -170,9 +157,7 @@ void TernaryTree::fuzzyFind(
     TNode *pNode = NULL;
     while( word.length() > 1 )
     {
-#ifdef INFO
-        cout << "SEARCHING " << word.c_str() << "(" << pWord << ")" << endl;
-#endif
+        VERBOSE_LOG( LOG_INFO,  "SEARCHING " << word.c_str() << "(" << pWord << ")" << endl );
         if( find( word.c_str(), pParent, &pNode ) )
         {
             int score = getLevenshtein( word.c_str(), word.c_str() );
@@ -182,14 +167,10 @@ void TernaryTree::fuzzyFind(
         if( pNode )
             break;
 
-#ifdef INFO
-        cout << "NO \"" << word.c_str() << "\" found; ";
-#endif
+        VERBOSE_LOG( LOG_INFO,  "NO \"" << word.c_str() << "\" found; " );
 
         word = word.substr( 0, word.length() - 1 );
-#ifdef INFO
-        cout << "TRYING: " << word.c_str() << "(" << pWord << ")" << endl;
-#endif
+        VERBOSE_LOG( LOG_INFO,  "TRYING: " << word.c_str() << "(" << pWord << ")" << endl );
     }
 
     // now extrapolate and score possibilities from stem
@@ -197,7 +178,7 @@ void TernaryTree::fuzzyFind(
     {
         deque< UCHAR > accum;
         //                accum.resize( 1 << 16 );
-        cout << "TRYING " << word.c_str() << "(" << pWord << ")" << endl;
+        VERBOSE_LOG( LOG_INFO,  "TRYING " << word.c_str() << "(" << pWord << ")" << endl );
         extrapolateAll( pNode, pWords, &accum, word.c_str(), pWord );
     }
 }
@@ -256,9 +237,7 @@ bool TernaryTree::extrapolate(
     // Is this the end of a full word, ergo "o" in "piano"?
     if( pNode->getTerminator() )
     {
-#ifdef DEBUG
-        cout << "TERMINATOR: " << pNode << endl;
-#endif
+        VERBOSE_LOG( LOG_DEBUG,  "TERMINATOR: " << pNode << endl );
         string word, compound;
         TNode *pCur = pNode;
         while (pCur != pRoot && pCur)
@@ -272,23 +251,17 @@ bool TernaryTree::extrapolate(
         auto commit = *accum;
         while( !commit.empty() )
         {
-#ifdef DEBUG
-            cout << commit.front();
-#endif
+            VERBOSE_LOG( LOG_DEBUG,  commit.front() );
             word.push_back( commit.front() );
             commit.pop_front();
         }
-#ifdef DEBUG
-        cout << endl;
-#endif
+        VERBOSE_LOG( LOG_DEBUG,  endl );
 
         compound = pStem;
         compound = compound.substr( 0, compound.length() );
         compound += "|";
         compound += word;
-#ifdef DEBUG
-        cout << "ADDING " << compound.c_str() << endl;
-#endif
+        VERBOSE_LOG( LOG_DEBUG,  "ADDING " << compound.c_str() << endl );
 
         // Looks like it's a pain in the butt (vs. regular ANSI C sprintf)
         // to format the "new, improved" STL string, so we'll just print
@@ -299,9 +272,7 @@ bool TernaryTree::extrapolate(
         while( ( pWords )->count( tieBreaker + ( score << 6 ) ) != 0 )
             tieBreaker++;
         ( *pWords )[ tieBreaker + ( score << 6 )] = compound;
-#ifdef DEBUG
-        cout << "SCORING " << pWord << " =|= " << compound.c_str() << " SCORE: " << score << endl;
-#endif
+        VERBOSE_LOG( LOG_DEBUG,  "SCORING " << pWord << " =|= " << compound.c_str() << " SCORE: " << score << endl );
         accum->clear();
 
     }
