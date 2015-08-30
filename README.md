@@ -3,10 +3,13 @@ This project implements a simple C++11 dictionary lookup algorithm utilizing ter
 Includes a very simple adumbrated sample dictionary.
 
 To build:
+
   make
   
 To run:
+
   bin/dicto
   
 To quit:
-  <ctrl>-c
+
+  [ctrl]-c
