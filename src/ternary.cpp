@@ -184,7 +184,7 @@ class TernaryTree
         //          ppParentLink pointer to parent's link (_left, _center, _right)
         void unlink( TNode *pDel, TNode *pParent, TNode **ppParentLink )
         {
-            // Update parent link to new child; we need to choose the
+            /* Update parent link to new child; we need to choose the
             // child to link from the parent since we can have up to three
             // yet we have only one parent link.
             //
@@ -197,7 +197,7 @@ class TernaryTree
             //         /
             //        x
             //
-            //
+            */
 
             // Re-parent
             // If child has a center child, prefer that as parent link's new child
@@ -445,7 +445,7 @@ void printNodeArr( int startIdx, int endIdx, TNode *pNodeArr )
         }
     }
 }
-
+#if 0
 // main
 // This is the main entry point and testbed for ternary tree.
 //
@@ -510,4 +510,4 @@ int main()
 
     return 0;
 }
-
+#endif
