@@ -16,10 +16,6 @@ OBJEXT      := o
 
 #Flags, Libraries and Includes
 
-SDL_CONFIG ?= sdl-config
-SDL_CFLAGS = $(shell $(SDL_CONFIG) --cflags)
-SDL_LIBS = $(shell $(SDL_CONFIG) --libs)
-
 #PROFILING
 #CFLAGS      := -std=c++11 -Wall -O0 -g -pg -ggdb -ansi -c
 #LFLAGS      := -pg
@@ -27,10 +23,8 @@ SDL_LIBS = $(shell $(SDL_CONFIG) --libs)
 #CFLAGS      := -std=c++11 -Wall -O0 -g -ggdb -ansi -c -finstrument-functions
 #OPTIMIZED
 CFLAGS      := -std=c++11 -g -Wall -O3 -c
-CFLAGS 		+= $(SDL_CFLAGS)
-CFLAGS 		+= $(CURL_CFLAGS)
 
-LIB 				:= $(SDL_LIBS) $(CURL_LIBS) -lm -lzip
+LIB 				:=
 INC         := -I$(INCDIR) -I/usr/local/include
 INCDEP      := -I$(INCDIR)
 
