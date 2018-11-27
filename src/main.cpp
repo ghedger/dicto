@@ -36,20 +36,15 @@
 #include <algorithm>
 #include "templ_node.h"
 #include "ternary_tree.h"
-#include "heap_mgr.h"
 #include "log.h"
 
-
-// declutter: allow cout instead of std::cout
-using namespace std;
-
-int getWordCount( ifstream *file )
+int getWordCount(std::ifstream *file)
 {
-    int lineTot = std::count(std::istreambuf_iterator<char>(*file),
-             std::istreambuf_iterator<char>(), '\n');
+  int lineTot = std::count(std::istreambuf_iterator<char>(*file),
+      std::istreambuf_iterator<char>(), '\n');
 
-    file->seekg( 0 );
-    return lineTot;
+  file->seekg(0);
+  return lineTot;
 }
 
 // readDictionaryFile
@@ -59,50 +54,50 @@ int getWordCount( ifstream *file )
 //
 // @In:     -
 // @Out:    -
-void readDictionaryFile( const char *path, TernaryTree *pTree, TNode *& pRoot )
+void readDictionaryFile(const char *path, TernaryTree *pTree, TNode *& pRoot)
 {
-    try
+  try
+  {
+    std::ifstream file(path);
+    std::string line;
+    int lineTot = getWordCount(&file);
+    int start = lineTot >> 1;
+    int idx = 0;
+
+    VERBOSE_LOG(LOG_INFO, "Reading " << lineTot << " words." << std::endl);
+
+    // Begin at middle of file
+    while (idx < start)
     {
-        ifstream file( path );
-        string line;
-        int lineTot = getWordCount( &file );
-        int start = lineTot >> 1;
-        int idx = 0;
-
-        VERBOSE_LOG( LOG_INFO, "Reading " << lineTot << " words." << endl );
-
-        // Begin at middle of file
-        while( idx < start )
-        {
-            getline( file, line );
-            idx++;
-        }
-
-        // Insert second half
-        VERBOSE_LOG( LOG_INFO, "Reading phase 1..." << endl );
-        while( getline( file, line ) )
-        {
-            VERBOSE_LOG( LOG_DEBUG, "|" << line.c_str() << "|" << endl );
-            pTree->insert( line.c_str(), &pRoot );
-        }
-
-        // Insert first half
-        VERBOSE_LOG( LOG_INFO, "Reading phase 2..." << endl );
-        idx = 0;
-        file.clear();
-        file.seekg( 0, ios::beg );
-        while( idx < start )
-        {
-            getline( file, line );
-            VERBOSE_LOG( LOG_DEBUG, "|" << line.c_str() << "|" << endl );
-            pTree->insert( line.c_str(), &pRoot );
-            idx++;
-        }
+      getline(file, line);
+      idx++;
     }
-    catch(...)
+
+    // Insert second half
+    VERBOSE_LOG(LOG_INFO, "Reading phase 1..." << std::endl);
+    while (getline(file, line) )
     {
-        VERBOSE_LOG( 0, "Error reading file." );
+      VERBOSE_LOG(LOG_DEBUG, "|" << line.c_str() << "|" << std::endl);
+      pTree->insert(line.c_str(), &pRoot);
     }
+
+    // Insert first half
+    VERBOSE_LOG(LOG_INFO, "Reading phase 2..." << std::endl);
+    idx = 0;
+    file.clear();
+    file.seekg(0, std::ios::beg);
+    while (idx < start)
+    {
+      getline(file, line);
+      VERBOSE_LOG(LOG_DEBUG, "|" << line.c_str() << "|" << std::endl);
+      pTree->insert(line.c_str(), &pRoot);
+      idx++;
+    }
+  }
+  catch(...)
+  {
+    VERBOSE_LOG(0, "Error reading file." );
+  }
 }
 
 // outPreamble
@@ -111,11 +106,11 @@ void readDictionaryFile( const char *path, TernaryTree *pTree, TNode *& pRoot )
 // @Out:    -
 void outPreamble()
 {
-    cout <<  "Dicto" << endl;
-    cout <<  "Copyright (C) 2015 Gregory P. Hedger" << endl;
-    cout << "This program comes with ABSOLUTELY NO WARRANTY." << endl;
-    cout << "This is free software, and you are welcome to redistribute it" << endl;
-    cout << "under certain conditions covered by GNU Public License v3.0." << endl;
+  std::cout <<  "Dicto" << std::endl;
+  std::cout <<  "Copyright (C) 2015 Gregory P. Hedger" << std::endl;
+  std::cout << "This program comes with ABSOLUTELY NO WARRANTY." << std::endl;
+  std::cout << "This is free software, and you are welcome to redistribute it" << std::endl;
+  std::cout << "under certain conditions covered by GNU Public License v3.0." << std::endl;
 }
 
 
@@ -126,7 +121,7 @@ void outPreamble()
 // @Out:    -
 void outPrompt()
 {
-    cout << endl << ">" ;
+  std::cout << std::endl << ">" ;
 }
 
 // outUsage
@@ -136,19 +131,19 @@ void outPrompt()
 // @Out:    -
 void outUsage()
 {
-    outPreamble();
-    cout << "Usage:" << endl;
-    cout << "dicto [flags]:" << endl;
-    cout << "Flags:" << endl;
-    cout << "\t-v set verbosity: -v0 none -v1 info -v2 debug" << endl;
+  outPreamble();
+  std::cout << "Usage:" << std::endl;
+  std::cout << "dicto [flags]:" << std::endl;
+  std::cout << "Flags:" << std::endl;
+  std::cout << "\t-v set verbosity: -v0 none -v1 info -v2 debug" << std::endl;
 }
 
 // LEG is used for printTraversal to tell what leg the current node is on.
 enum LEG
 {
-    LEG_L   = 0,
-    LEG_C,
-    LEG_R,
+  LEG_L   = 0,
+  LEG_C,
+  LEG_R,
 };
 
 // We're going to render into a buffer
@@ -165,72 +160,70 @@ static char _renderBuf [ screenWidth * screenHeight ];
 //          leg left, right, or center
 //          htab starting htab
 // @Out:    -
-void printTraversal( TNode *pNode, LEG leg, int htab, int depth = 0 )
+void printTraversal(TNode *pNode, LEG leg, int htab, int depth = 0)
 {
-    int vtab = depth;
+  int vtab = depth;
 
-    // Initialize render buf if at top
-    if( !depth )
+  // Initialize render buf if at top
+  if (!depth) {
+    printf("\n");
+    memset(_renderBuf, ' ', sizeof(_renderBuf) );
+    htab = screenWidth >> 1;        // set initial htab to center of rendering buffer
+  }
+
+  if (depth > 3)
+    return;
+
+
+  // Caculate screen layout
+  switch (leg) {
+    case LEG_L:
+      htab -= 22 - (depth << 1);
+      _renderBuf[ htab - 1 + (vtab * screenWidth) ] = '>';
+      break;
+    case LEG_R:
+      htab += 22 - (depth << 1);
+      _renderBuf[ htab - 1 + (vtab * screenWidth) ] = '<';
+      break;
+    case LEG_C:
+      _renderBuf[ htab - 1 + (vtab * screenWidth) ] = '^';
+      break;
+    default:
+      break;
+  }
+
+  // printf("htab: %d depth: %d value: %c\n", htab, depth, pNode->getKey());
+
+  sprintf(&_renderBuf[ htab + (vtab * screenWidth) ], "%c",  pNode->getKey());
+  if (pNode->getLeft() )
+  {
+    printTraversal(pNode->getLeft(), LEG_L, htab, depth + 1);
+  }
+  if (pNode->getCenter() )
+  {
+    printTraversal(pNode->getCenter(), LEG_C, htab, depth + 1);
+  }
+  if (pNode->getRight() )
+  {
+    printTraversal(pNode->getRight(), LEG_R, htab, depth + 1);
+  }
+
+  // If we're done, print out the rendered tree
+  if (!depth)
+  {
+    int i, j;
+    for (j = 0; j < screenHeight; j++ )
     {
-        printf("\n");
-        memset( _renderBuf, ' ', sizeof( _renderBuf ) );
-        htab = screenWidth >> 1;        // set initial htab to center of rendering buffer
+      for (i = 0; i < screenWidth; i++ )
+      {
+        char c = _renderBuf[ i +  (j * screenWidth)];
+        // Replace terminator with space
+        c = c ? c : ' ';
+        putchar(c);
+      }
+      printf("\n" );         // Print LF every screenWidth columns
     }
-
-    if( depth > 3 )
-        return;
-
-
-    // Caculate screen layout
-    switch( leg )
-    {
-        case LEG_L:
-            htab -= 22 - (depth << 1);
-            _renderBuf[ htab - 1 + ( vtab * screenWidth ) ] = '>';
-            break;
-       case LEG_R:
-            htab += 22 - (depth << 1);
-            _renderBuf[ htab - 1 + ( vtab * screenWidth ) ] = '<';
-            break;
-        case LEG_C:
-            _renderBuf[ htab - 1 + ( vtab * screenWidth ) ] = '^';
-            break;
-        default:
-            break;
-    }
-
-//    printf("htab: %d depth: %d value: %c\n", htab, depth, pNode->getKey());
-
-    sprintf( &_renderBuf[ htab + ( vtab * screenWidth ) ], "%c",  pNode->getKey());
-    if( pNode->getLeft() )
-    {
-        printTraversal( pNode->getLeft(), LEG_L, htab, depth + 1 );
-    }
-    if( pNode->getCenter() )
-    {
-        printTraversal( pNode->getCenter(), LEG_C, htab, depth + 1 );
-    }
-    if( pNode->getRight() )
-    {
-        printTraversal( pNode->getRight(), LEG_R, htab, depth + 1 );
-    }
-
-    // If we're done, print out the rendered tree
-    if( !depth )
-    {
-        int i, j;
-        for( j = 0; j < screenHeight; j++ )
-        {
-            for( i = 0; i < screenWidth; i++ )
-            {
-                char c = _renderBuf[ i +  ( j * screenWidth )];
-                // Replace terminator with space
-                c = c ? c : ' ';
-                putchar( c );
-            }
-            printf( "\n" );         // Print LF every screenWidth columns
-        }
-    }
+  }
 }
 
 // main
@@ -238,84 +231,71 @@ void printTraversal( TNode *pNode, LEG leg, int htab, int depth = 0 )
 //
 // @In:     -
 // @Out:    0 == success
-int main( int argc, const char *argv[] )
+int main(int argc, const char *argv[] )
 {
-    const int MAX_IN = 128;
-    TNode *pRoot = NULL;
-    TernaryTree t;
+  const int MAX_IN = 128;
+  TNode *pRoot = NULL;
+  TernaryTree t;
 
-    // parseargs
-    if( 1 < argc ) {
-        int i = 1;
-        while( i < argc )
-        {
-            if( '-' == argv[i][0] )
+  // parseargs
+  if (1 < argc) {
+    int i = 1;
+    while (i < argc) {
+      if ('-' == argv[i][0]) {
+        switch(argv[i][1]) {
+          case 'v':
             {
-                switch( argv[i][1] )
-                {
-                    case 'v':
-                        {
-                            int verbosity;
-                            if( isdigit(verbosity = argv[i][2] ) )
-                            {
-                                LOG_LEVEL ll = (LOG_LEVEL) (verbosity - ( int ) '0');
-                                SET_VERBOSITY_LEVEL( ll );
-                            }
-                        }
-                        break;
-                    default:
-                        outUsage();
-                        return 1;
-                }
+              int verbosity;
+              if (isdigit(verbosity = argv[i][2])) {
+                LOG_LEVEL ll = (LOG_LEVEL) (verbosity - (int) '0');
+                SET_VERBOSITY_LEVEL(ll);
+              }
             }
-            else
-            {
-                outUsage();
-                return 1;
-            }
-
-            i++;
+            break;
+          default:
+            outUsage();
+            return 1;
         }
+      }
+      else
+      {
+        outUsage();
+        return 1;
+      }
+
+      i++;
     }
+  }
 
+  outPreamble();
 
-    outPreamble();
+  readDictionaryFile("dict.txt", &t, pRoot);
 
-    readDictionaryFile( "dict.txt", &t, pRoot );
+  // Print out the top portion of the tree
+  if (LOG_DEBUG <= GET_LOG_VERBOSITY())
+    printTraversal(pRoot, LEG_C, 0, 0);
 
-    // Print out the top portion of the tree
-    if( LOG_DEBUG <= GET_LOG_VERBOSITY())
-        printTraversal( pRoot, LEG_C, 0, 0 );
+  char in[ MAX_IN ];
+  while (1) {
+    outPrompt();
+    std::cin >> in;
 
-    char in[ MAX_IN ];
-    while(1)
-    {
-        outPrompt();
-        cin >> in;
+    // Extrapolate words from a prefix
+    const char *pPrefix = in;
+    std::cout << in << "...let's see..." << std::endl;
 
-        // Extrapolate words from a prefix
-        TNode *pPrefixNode = NULL;
-        const char *pPrefix = in;
-        char stem[ MAX_IN ];
-        bool directHit = false;
-        cout << in << "...let's see..." << endl;
+    std::map< int, std::string > extrapolation;
+    t.fuzzyFind(pPrefix, pRoot, &extrapolation);
 
-        map< int, string > extrapolation;
-        t.fuzzyFind( pPrefix, pRoot, &extrapolation );
-
-        if( !extrapolation.empty() )
-        {
-            cout << "SUGGESTIONS:" << endl;
-            for ( auto it : extrapolation )
-            {
-                 cout << "(" << ( ( ( it ).first ) >> 6 ) << ") ";
-                 cout << ( ( it ).second.c_str() ) << endl;
-            }
-        }
-        else
-            cout << "NO SUGGESTION..." << endl;
+    if (!extrapolation.empty()) {
+      std::cout << "SUGGESTIONS:" << std::endl;
+      for (auto it : extrapolation) {
+        std::cout << "(" << (((it).first) >> 6) << ") ";
+        std::cout << ((it).second.c_str()) << std::endl;
+      }
+    } else {
+      std::cout << "NO SUGGESTION..." << std::endl;
     }
-    return 0;
+  }
+  return 0;
 }
-
-

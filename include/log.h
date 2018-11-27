@@ -26,9 +26,9 @@
 #pragma once
 
 enum _LOG_LEVEL {
-    LOG_NONE = 0,
-    LOG_INFO,
-    LOG_DEBUG
+  LOG_NONE = 0,
+  LOG_INFO,
+  LOG_DEBUG
 };
 
 typedef _LOG_LEVEL LOG_LEVEL;
@@ -36,7 +36,9 @@ typedef _LOG_LEVEL LOG_LEVEL;
 LOG_LEVEL getVerbosity();
 void setVerbosity( LOG_LEVEL );
 
-
-#define VERBOSE_LOG(lev,a) if(getVerbosity() >= lev) {cout << a;}
+// TODO: Make these inline?  Trouble is, "a" can be
+//  "Reading " << lineTot << " words." << endl
+// Circle back to this later...
+#define VERBOSE_LOG(lev,a) if(getVerbosity() >= lev) {std::cout << a;}
 #define SET_VERBOSITY_LEVEL(a) setVerbosity(a)
 #define GET_LOG_VERBOSITY() (getVerbosity())
