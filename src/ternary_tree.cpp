@@ -176,10 +176,10 @@ void TernaryTree::fuzzyFind(
 // extrapolateAll
 // extrapolate all possibilities from an input strung.
 //
-// @In: pNode pointer to starting node
-// pVect vector of words
-// @Out: -
-// pVect filled with words from starting node
+// @In:   pNode pointer to starting node
+//        pWords vector of words
+// @Out:  at least one match found
+//        pWords filled with words from starting node
 bool TernaryTree::extrapolateAll(
     TNode *pNode,
     std::map< int, std::string > *pWords,
@@ -205,8 +205,8 @@ bool TernaryTree::extrapolateAll(
 // functionality.
 //
 // @In:     pNode pointer to starting node
-//          pVect vector of words
-// @Out:    -
+//          pWords map of words, keyed by score
+// @Out:    true == match found
 //          pVect filled with words from starting node
 bool TernaryTree::extrapolate(
     TNode *pRoot,
@@ -258,7 +258,6 @@ bool TernaryTree::extrapolate(
     (*pWords)[ tieBreaker + (score << 6)] = compound;
     VERBOSE_LOG(LOG_DEBUG,  "SCORING " << pWord << " =|= " << compound.c_str() << " SCORE: " << score << std::endl);
     accum->clear();
-
   }
 
   // Recurse
