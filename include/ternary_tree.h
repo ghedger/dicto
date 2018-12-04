@@ -44,11 +44,11 @@ class TNode : public TemplNode <UCHAR, TNode> {
   TNode() {};
   TNode(UCHAR key) : TemplNode <UCHAR, TNode> (key) { };
   ~TNode() {};
-  void setKey(UCHAR key)
+  void SetKey(UCHAR key)
   {
       if(isupper(key) )
       {
-          setUpper();
+          SetUpper();
       }
       key_ = (UCHAR) tolower(key);
   }
@@ -69,7 +69,7 @@ class TernaryTree {
   // @In: pWord pointer to null-terminated string
   // ppParent pointer to parent pointer
   // @Out: Node *
-  TNode * insert(const char *pWord, TNode **ppNode = NULL);
+  TNode * Insert(const char *pWord, TNode **ppNode = NULL);
   // find
   // find a word
   //
@@ -77,7 +77,7 @@ class TernaryTree {
   //          @pParent pointer to current parent node
   //          @ppTerminal pointer to terminal node pointer
   // @Out:    true == match found
-  bool find(const char *pWord, TNode *pParent, TNode ** ppTerminal = NULL);
+  bool Find(const char *pWord, TNode *pParent, TNode ** ppTerminal = NULL);
 
   // Perform an inexact, "fuzzy" lookup of a word
   //
@@ -85,7 +85,7 @@ class TernaryTree {
   //          @pParent pointer to current parent node
   // @Out:    true == match found
   //          @map key/value pair map with tiebroken score and word
-  void fuzzyFind(
+  void FuzzyFind(
     const char *pWord,
     TNode *pParent,
     std::map< int, std::string > *pWords);
@@ -96,7 +96,7 @@ class TernaryTree {
   // pVect vector of words
   // @Out: -
   // pVect filled with words from starting node
-  bool extrapolateAll(
+  bool ExtrapolateAll(
     TNode *pNode,
     std::map< int, std::string > *pWords,
     std::deque< UCHAR > *accum,
@@ -115,7 +115,7 @@ class TernaryTree {
   //          pVect vector of words
   // @Out:    -
   //          pVect filled with words from starting node
-  bool extrapolate(
+  bool Extrapolate(
     TNode *pRoot,
     TNode *pNode,
     std::map< int, std::string > *pWords,
@@ -130,7 +130,7 @@ class TernaryTree {
   //
   // @In: key key of node to add
   // @Out: Pointer to node
-  TNode *allocNode(char key);
+  TNode *AllocNode(char key);
 
   // Utility preprocessor macro for Levenshtein
 
@@ -142,5 +142,5 @@ class TernaryTree {
   // @In: s1 string #1
   // s2 string #2
   // @Out: Levenshtein difference
-  int getLevenshtein(const char *s1, const char *s2);
+  int CalcLevenshtein(const char *s1, const char *s2);
 };

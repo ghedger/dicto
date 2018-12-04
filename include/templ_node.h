@@ -40,20 +40,20 @@ template <typename kt_, class nc_> class TemplNode {
   ~TemplNode() {}
 
   // getters/setters
-  void setKey( kt_ key ) { key_ = key; }
-  kt_ getKey() { return key_; }
-  void setParent( nc_ *pParent ) { parent_ = pParent; }
-  nc_ * getParent() { return parent_; }
-  void setLeft( nc_ *pNode ) { l_ = pNode; }
-  nc_ * getLeft() { return l_; }
-  void setRight( nc_ *pNode ) { r_ = pNode; }
-  nc_ * getRight() { return r_; }
-  void setCenter( nc_ *pNode ) { c_ = pNode; }
-  nc_ * getCenter() { return c_; }
-  void setTerminator() { terminator_ = 1; }
-  bool getTerminator() { return terminator_ ? true : false; }
-  void setUpper() { upper_ = 1; }
-  bool getUpper() { return upper_ ? true : false; }
+  void SetKey( kt_ key ) { key_ = key; }
+  kt_ GetKey() { return key_; }
+  void SetParent( nc_ *pParent ) { parent_ = pParent; }
+  nc_ * GetParent() { return parent_; }
+  void SetLeft( nc_ *pNode ) { l_ = pNode; }
+  nc_ * GetLeft() { return l_; }
+  void SetRight( nc_ *pNode ) { r_ = pNode; }
+  nc_ * GetRight() { return r_; }
+  void SetCenter( nc_ *pNode ) { c_ = pNode; }
+  nc_ * GetCenter() { return c_; }
+  void SetTerminator() { terminator_ = 1; }
+  bool GetTerminator() { return terminator_ ? true : false; }
+  void SetUpper() { upper_ = 1; }
+  bool GetUpper() { return upper_ ? true : false; }
 
   // clear out node.
   void clear() {

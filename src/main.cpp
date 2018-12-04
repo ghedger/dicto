@@ -38,7 +38,7 @@
 #include "ternary_tree.h"
 #include "log.h"
 
-int getWordCount(std::ifstream *file)
+int GetWordCount(std::ifstream *file)
 {
   int lineTot = std::count(std::istreambuf_iterator<char>(*file),
       std::istreambuf_iterator<char>(), '\n');
@@ -47,20 +47,20 @@ int getWordCount(std::ifstream *file)
   return lineTot;
 }
 
-// readDictionaryFile
+// ReadDictionaryFile
 // Read dictionary file into our data structure.
 // TODO (RFE): Would be nice to have the tree self-balance
 // instead of reading the sorted file in two halves...
 //
 // @In:     -
 // @Out:    -
-void readDictionaryFile(const char *path, TernaryTree *pTree, TNode *& pRoot)
+void ReadDictionaryFile(const char *path, TernaryTree *pTree, TNode *& pRoot)
 {
   try
   {
     std::ifstream file(path);
     std::string line;
-    int lineTot = getWordCount(&file);
+    int lineTot = GetWordCount(&file);
     int start = lineTot >> 1;
     int idx = 0;
 
@@ -78,7 +78,7 @@ void readDictionaryFile(const char *path, TernaryTree *pTree, TNode *& pRoot)
     while (getline(file, line) )
     {
       VERBOSE_LOG(LOG_DEBUG, "|" << line.c_str() << "|" << std::endl);
-      pTree->insert(line.c_str(), &pRoot);
+      pTree->Insert(line.c_str(), &pRoot);
     }
 
     // Insert first half
@@ -90,7 +90,7 @@ void readDictionaryFile(const char *path, TernaryTree *pTree, TNode *& pRoot)
     {
       getline(file, line);
       VERBOSE_LOG(LOG_DEBUG, "|" << line.c_str() << "|" << std::endl);
-      pTree->insert(line.c_str(), &pRoot);
+      pTree->Insert(line.c_str(), &pRoot);
       idx++;
     }
   }
@@ -100,11 +100,11 @@ void readDictionaryFile(const char *path, TernaryTree *pTree, TNode *& pRoot)
   }
 }
 
-// outPreamble
+// OutputPreamble
 //
 // @In:     -
 // @Out:    -
-void outPreamble()
+void OutputPreamble()
 {
   std::cout <<  "Dicto" << std::endl;
   std::cout <<  "Copyright (C) 2015 Gregory P. Hedger" << std::endl;
@@ -114,31 +114,31 @@ void outPreamble()
 }
 
 
-// outPrompt
+// PrintPrompt
 // output prompt
 //
 // @In:     -
 // @Out:    -
-void outPrompt()
+void PrintPrompt()
 {
   std::cout << std::endl << ">" ;
 }
 
-// outUsage
+// PrintUsage
 // Print basic program usage/invocation
 //
 // @In:     -
 // @Out:    -
-void outUsage()
+void PrintUsage()
 {
-  outPreamble();
+  OutputPreamble();
   std::cout << "Usage:" << std::endl;
   std::cout << "dicto [flags]:" << std::endl;
   std::cout << "Flags:" << std::endl;
   std::cout << "\t-v set verbosity: -v0 none -v1 info -v2 debug" << std::endl;
 }
 
-// LEG is used for printTraversal to tell what leg the current node is on.
+// LEG is used for PrintTraversal to tell what leg the current node is on.
 enum LEG
 {
   LEG_L   = 0,
@@ -151,7 +151,7 @@ const int screenWidth = 80;
 const int screenHeight = 8;
 static char _renderBuf [ screenWidth * screenHeight ];
 
-// printTraversal
+// PrintTraversal
 // Render and prints a rudimentary treelike representation to console.
 // Note this is rather rough, added at the end of this demo; it could be
 //  improved.
@@ -160,7 +160,7 @@ static char _renderBuf [ screenWidth * screenHeight ];
 //          leg left, right, or center
 //          htab starting htab
 // @Out:    -
-void printTraversal(TNode *pNode, LEG leg, int htab, int depth = 0)
+void PrintTraversal(TNode *pNode, LEG leg, int htab, int depth = 0)
 {
   int vtab = depth;
 
@@ -192,20 +192,20 @@ void printTraversal(TNode *pNode, LEG leg, int htab, int depth = 0)
       break;
   }
 
-  // printf("htab: %d depth: %d value: %c\n", htab, depth, pNode->getKey());
+  // printf("htab: %d depth: %d value: %c\n", htab, depth, pNode->GetKey());
 
-  sprintf(&_renderBuf[ htab + (vtab * screenWidth) ], "%c",  pNode->getKey());
-  if (pNode->getLeft() )
+  sprintf(&_renderBuf[ htab + (vtab * screenWidth) ], "%c",  pNode->GetKey());
+  if (pNode->GetLeft() )
   {
-    printTraversal(pNode->getLeft(), LEG_L, htab, depth + 1);
+    PrintTraversal(pNode->GetLeft(), LEG_L, htab, depth + 1);
   }
-  if (pNode->getCenter() )
+  if (pNode->GetCenter() )
   {
-    printTraversal(pNode->getCenter(), LEG_C, htab, depth + 1);
+    PrintTraversal(pNode->GetCenter(), LEG_C, htab, depth + 1);
   }
-  if (pNode->getRight() )
+  if (pNode->GetRight() )
   {
-    printTraversal(pNode->getRight(), LEG_R, htab, depth + 1);
+    PrintTraversal(pNode->GetRight(), LEG_R, htab, depth + 1);
   }
 
   // If we're done, print out the rendered tree
@@ -231,7 +231,7 @@ void printTraversal(TNode *pNode, LEG leg, int htab, int depth = 0)
 //
 // @In:     -
 // @Out:    0 == success
-int main(int argc, const char *argv[] )
+int main(int argc, const char *argv[])
 {
   const int MAX_IN = 128;
   TNode *pRoot = NULL;
@@ -253,13 +253,13 @@ int main(int argc, const char *argv[] )
             }
             break;
           default:
-            outUsage();
+            PrintUsage();
             return 1;
         }
       }
       else
       {
-        outUsage();
+        PrintUsage();
         return 1;
       }
 
@@ -267,17 +267,16 @@ int main(int argc, const char *argv[] )
     }
   }
 
-  outPreamble();
-
-  readDictionaryFile("dict.txt", &t, pRoot);
+  OutputPreamble();
+  ReadDictionaryFile("dict.txt", &t, pRoot);
 
   // Print out the top portion of the tree
   if (LOG_DEBUG <= GET_LOG_VERBOSITY())
-    printTraversal(pRoot, LEG_C, 0, 0);
+    PrintTraversal(pRoot, LEG_C, 0, 0);
 
   char in[ MAX_IN ];
   while (1) {
-    outPrompt();
+    PrintPrompt();
     std::cin >> in;
 
     // Extrapolate words from a prefix
@@ -285,7 +284,7 @@ int main(int argc, const char *argv[] )
     std::cout << in << "...let's see..." << std::endl;
 
     std::map< int, std::string > extrapolation;
-    t.fuzzyFind(pPrefix, pRoot, &extrapolation);
+    t.FuzzyFind(pPrefix, pRoot, &extrapolation);
 
     if (!extrapolation.empty()) {
       std::cout << "SUGGESTIONS:" << std::endl;

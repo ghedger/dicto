@@ -48,87 +48,87 @@ typedef unsigned char UCHAR;
 // This is a dictionary and allows us quick word lookup
 // with a yes/no response.
 
-// insertNode
-// insert a node into the tree
+// InsertNode
+// Insert a node into the tree
 //
 // @In: pWord pointer to null-terminated string
 // ppParent pointer to parent pointer
 // @Out: Node *
-TNode * TernaryTree::insert(const char *pWord, TNode **ppNode)
+TNode * TernaryTree::Insert(const char *pWord, TNode **ppNode)
 {
   TNode * pChild = NULL;
-  VERBOSE_LOG(LOG_DEBUG, "insert >>>>>" << std::endl);
+  VERBOSE_LOG(LOG_DEBUG, "Insert >>>>>" << std::endl);
   if (!(*ppNode)) {
-    *ppNode = allocNode(*pWord);
+    *ppNode = AllocNode(*pWord);
     VERBOSE_LOG(LOG_DEBUG, "ALLOC" << std::endl);
   }
-  if (tolower(*pWord) < ((*ppNode)->getKey())) {
+  if (tolower(*pWord) < ((*ppNode)->GetKey())) {
     VERBOSE_LOG(LOG_DEBUG,  "L: " << pWord);
-    insert(pWord, &((*ppNode)->l_));
-    (*ppNode)->getLeft()->setParent((*ppNode)->getParent());
+    Insert(pWord, &((*ppNode)->l_));
+    (*ppNode)->GetLeft()->SetParent((*ppNode)->GetParent());
   }
-  else if (tolower(*pWord) > (*ppNode)->getKey()) {
+  else if (tolower(*pWord) > (*ppNode)->GetKey()) {
     VERBOSE_LOG(LOG_DEBUG,  "R: " << pWord << std::endl);
     // Add a peer on the right
-    insert(pWord, &((*ppNode)->r_));
-    (*ppNode)->getRight()->setParent((*ppNode)->getParent());
+    Insert(pWord, &((*ppNode)->r_));
+    (*ppNode)->GetRight()->SetParent((*ppNode)->GetParent());
   } else {
     // Is this the last letter (is there a char in the second position?)
     if (pWord[ 1 ])
     {
       VERBOSE_LOG(LOG_DEBUG,  "C: " << pWord << std::endl);
-      pChild = insert(pWord + 1, &((*ppNode)->c_));
-      pChild->setParent(*ppNode);
+      pChild = Insert(pWord + 1, &((*ppNode)->c_));
+      pChild->SetParent(*ppNode);
     }
     else
     {
       // Yep, last one...
       VERBOSE_LOG(LOG_DEBUG,  "T: " << pWord << std::endl);
-      (*ppNode)->setTerminator();
+      (*ppNode)->SetTerminator();
     }
   }
 
 
-  VERBOSE_LOG(LOG_DEBUG,  "insert <<<<<" << std::endl);
+  VERBOSE_LOG(LOG_DEBUG,  "Insert <<<<<" << std::endl);
   /*
      VERBOSE_LOG(LOG_DEBUG,  "" << std::endl);
-     VERBOSE_LOG(LOG_DEBUG,  " K: " << (*ppNode)->getKey());
-     VERBOSE_LOG(LOG_DEBUG,  " L: " << (*ppNode)->getLeft());
-     VERBOSE_LOG(LOG_DEBUG,  " C: " << (*ppNode)->getCenter());
-     VERBOSE_LOG(LOG_DEBUG,  " R: " << (*ppNode)->getRight());
-     VERBOSE_LOG(LOG_DEBUG,  " P: " << (*ppNode)->getParent());
+     VERBOSE_LOG(LOG_DEBUG,  " K: " << (*ppNode)->GetKey());
+     VERBOSE_LOG(LOG_DEBUG,  " L: " << (*ppNode)->GetLeft());
+     VERBOSE_LOG(LOG_DEBUG,  " C: " << (*ppNode)->GetCenter());
+     VERBOSE_LOG(LOG_DEBUG,  " R: " << (*ppNode)->GetRight());
+     VERBOSE_LOG(LOG_DEBUG,  " P: " << (*ppNode)->GetParent());
      VERBOSE_LOG(LOG_DEBUG,  std::endl);
      */
 
   return *ppNode;
 };
 
-// find
-// find a word
+// Find
+// Find a word
 //
 // @In:     @pWord pointer to null-terminated string
 //          @pParent pointer to current parent node
 //          @ppTerminal pointer to terminal node pointer
 // @Out:    true == match found
-bool TernaryTree::find(const char *pWord, TNode *pParent, TNode ** ppTerminal)
+bool TernaryTree::Find(const char *pWord, TNode *pParent, TNode ** ppTerminal)
 {
   bool ret = false;
   if (pParent)
   {
-    if ((*pWord) < pParent->getKey())
-      ret = find(pWord, pParent->getLeft(), ppTerminal);
-    else if ((*pWord) > pParent->getKey())
-      ret = find(pWord, pParent->getRight(), ppTerminal);
+    if ((*pWord) < pParent->GetKey())
+      ret = Find(pWord, pParent->GetLeft(), ppTerminal);
+    else if ((*pWord) > pParent->GetKey())
+      ret = Find(pWord, pParent->GetRight(), ppTerminal);
     else
     {
       if ('\0' == pWord[ 1 ])
       {
-        ret = pParent->getTerminator();
+        ret = pParent->GetTerminator();
         if (ppTerminal) // Mark pointer to node
           *ppTerminal = pParent;
       }
       else
-        ret = find(pWord + 1, pParent->getCenter(), ppTerminal);
+        ret = Find(pWord + 1, pParent->GetCenter(), ppTerminal);
     }
   }
   return ret;
@@ -140,7 +140,7 @@ bool TernaryTree::find(const char *pWord, TNode *pParent, TNode ** ppTerminal)
 //          @pParent pointer to current parent node
 // @Out:    true == match found
 //          @map key/value pair map with tiebroken score and word
-void TernaryTree::fuzzyFind(
+void TernaryTree::FuzzyFind(
     const char *pWord,
     TNode *pParent,
     std::map< int, std::string > *pWords)
@@ -150,7 +150,7 @@ void TernaryTree::fuzzyFind(
   while (word.length() > 1)
   {
     VERBOSE_LOG(LOG_INFO,  "SEARCHING " << word.c_str() << "(" << pWord << ")" << std::endl);
-    if (find(word.c_str(), pParent, &pNode)) {
+    if (Find(word.c_str(), pParent, &pNode)) {
       (*pWords)[0] = word.c_str();
       break;
     }
@@ -163,24 +163,24 @@ void TernaryTree::fuzzyFind(
     VERBOSE_LOG(LOG_INFO,  "TRYING: " << word.c_str() << "(" << pWord << ")" << std::endl);
   }
 
-  // now extrapolate and score possibilities from stem
+  // now Extrapolate and score possibilities from stem
   if (pNode)
   {
     std::deque< UCHAR > accum;
     //                accum.resize(1 << 16);
     VERBOSE_LOG(LOG_INFO,  "TRYING " << word.c_str() << "(" << pWord << ")" << std::endl);
-    extrapolateAll(pNode, pWords, &accum, word.c_str(), pWord);
+    ExtrapolateAll(pNode, pWords, &accum, word.c_str(), pWord);
   }
 }
 
-// extrapolateAll
-// extrapolate all possibilities from an input strung.
+// ExtrapolateAll
+// Extrapolate all possibilities from an input strung.
 //
 // @In:   pNode pointer to starting node
 //        pWords vector of words
 // @Out:  at least one match found
 //        pWords filled with words from starting node
-bool TernaryTree::extrapolateAll(
+bool TernaryTree::ExtrapolateAll(
     TNode *pNode,
     std::map< int, std::string > *pWords,
     std::deque< UCHAR > *accum,
@@ -188,7 +188,7 @@ bool TernaryTree::extrapolateAll(
     const char *pWord)
 {
   if (pNode) {
-    extrapolate(pNode, pNode->getCenter(), pWords, accum, pStem, pWord);
+    Extrapolate(pNode, pNode->GetCenter(), pWords, accum, pStem, pWord);
     return true;
   }
   else
@@ -196,8 +196,8 @@ bool TernaryTree::extrapolateAll(
 }
 
 
-// extrapolate
-// extrapolate from a word stem.
+// Extrapolate
+// Extrapolate from a word stem.
 //
 // I selected a deque as my accumulator data structure. A stack
 // requires a second stack or some other means of word reversal,
@@ -208,7 +208,7 @@ bool TernaryTree::extrapolateAll(
 //          pWords map of words, keyed by score
 // @Out:    true == match found
 //          pVect filled with words from starting node
-bool TernaryTree::extrapolate(
+bool TernaryTree::Extrapolate(
     TNode *pRoot,
     TNode *pNode,
     std::map< int, std::string > *pWords,
@@ -224,14 +224,14 @@ bool TernaryTree::extrapolate(
   bool ret = false;
 
   // Is this the end of a full word, ergo "o" in "piano"?
-  if (pNode->getTerminator()) {
+  if (pNode->GetTerminator()) {
     VERBOSE_LOG(LOG_DEBUG,  "TERMINATOR: " << pNode << std::endl);
     std::string word, compound;
     TNode *pCur = pNode;
     while (pCur != pRoot && pCur) {
       // Push this node's key onto our candidate accumulator
-      accum->push_front(pCur->getKey());
-      pCur = pCur->getParent();
+      accum->push_front(pCur->GetKey());
+      pCur = pCur->GetParent();
     }
     // Reverse stack.
     // NOTE: this could be more efficient with a deque
@@ -250,7 +250,7 @@ bool TernaryTree::extrapolate(
     VERBOSE_LOG(LOG_DEBUG,  "ADDING " << compound.c_str() << std::endl);
 
     // print the score out here for now.
-    int score = getLevenshtein(pWord, compound.c_str());
+    int score = CalcLevenshtein(pWord, compound.c_str());
     // Note: limit of 64 ties.
     int tieBreaker = 0;
     while ((pWords)->count(tieBreaker + (score << 6)) != 0)
@@ -261,30 +261,30 @@ bool TernaryTree::extrapolate(
   }
 
   // Recurse
-  if ((pChild = pNode->getLeft())) {
-    if (extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, depth + 1)) {
+  if ((pChild = pNode->GetLeft())) {
+    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, depth + 1)) {
       ret |= true;
       if (!accum->empty() &&
-          !pChild->getLeft() && !pChild->getCenter() && !pChild->getRight())
+          !pChild->GetLeft() && !pChild->GetCenter() && !pChild->GetRight())
       {
       }
     }
   }
 
-  if ((pChild = pNode->getCenter())) {
-    if (extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, depth + 1)) {
+  if ((pChild = pNode->GetCenter())) {
+    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, depth + 1)) {
       ret |= true;
       if ((!accum->empty() &&
-            !pChild->getLeft() && !pChild->getCenter() && !pChild->getRight())) {
+            !pChild->GetLeft() && !pChild->GetCenter() && !pChild->GetRight())) {
       }
     }
   }
 
-  if ((pChild = pNode->getRight())) {
-    if (extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, depth + 1)) {
+  if ((pChild = pNode->GetRight())) {
+    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, depth + 1)) {
       ret |= true;
       if ((!accum->empty() &&
-            !pChild->getLeft() && !pChild->getCenter() && !pChild->getRight())) {
+            !pChild->GetLeft() && !pChild->GetCenter() && !pChild->GetRight())) {
       }
     }
   }
@@ -293,16 +293,16 @@ bool TernaryTree::extrapolate(
 }
 
 
-// allocNode
-// insert a node into the tree
+// AllocNode
+// Insert a node into the tree
 //
 // @In: key key of node to add
 // @Out: Pointer to node
-TNode *TernaryTree::allocNode(char key)
+TNode *TernaryTree::AllocNode(char key)
 {
   TNode *pNode = new TNode(key);
   assert(pNode);
-  pNode->setKey(key);
+  pNode->SetKey(key);
   return pNode;
 }
 
@@ -313,7 +313,7 @@ TNode *TernaryTree::allocNode(char key)
 #error MIN3 Already defined!
 #endif
 
-// getLevenshtein
+// CalcLevenshtein
 //
 // This is an optimized Levenshtein string distance calculation.
 // It returns how "different" two strings are, effectively performing
@@ -322,7 +322,7 @@ TNode *TernaryTree::allocNode(char key)
 // @In: s1 string #1
 // s2 string #2
 // @Out: Levenshtein difference
-int TernaryTree::getLevenshtein(const char *s1, const char *s2)
+int TernaryTree::CalcLevenshtein(const char *s1, const char *s2)
 {
   int score = -1;
   if (s1 && s2) {
