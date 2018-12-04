@@ -91,14 +91,14 @@ TNode * TernaryTree::Insert(const char *pWord, TNode **ppNode)
 
   VERBOSE_LOG(LOG_DEBUG,  "Insert <<<<<" << std::endl);
   /*
-     VERBOSE_LOG(LOG_DEBUG,  "" << std::endl);
-     VERBOSE_LOG(LOG_DEBUG,  " K: " << (*ppNode)->GetKey());
-     VERBOSE_LOG(LOG_DEBUG,  " L: " << (*ppNode)->GetLeft());
-     VERBOSE_LOG(LOG_DEBUG,  " C: " << (*ppNode)->GetCenter());
-     VERBOSE_LOG(LOG_DEBUG,  " R: " << (*ppNode)->GetRight());
-     VERBOSE_LOG(LOG_DEBUG,  " P: " << (*ppNode)->GetParent());
-     VERBOSE_LOG(LOG_DEBUG,  std::endl);
-     */
+  VERBOSE_LOG(LOG_DEBUG,  "" << std::endl);
+  VERBOSE_LOG(LOG_DEBUG,  " K: " << (*ppNode)->GetKey());
+  VERBOSE_LOG(LOG_DEBUG,  " L: " << (*ppNode)->GetLeft());
+  VERBOSE_LOG(LOG_DEBUG,  " C: " << (*ppNode)->GetCenter());
+  VERBOSE_LOG(LOG_DEBUG,  " R: " << (*ppNode)->GetRight());
+  VERBOSE_LOG(LOG_DEBUG,  " P: " << (*ppNode)->GetParent());
+  VERBOSE_LOG(LOG_DEBUG,  std::endl);
+  */
 
   return *ppNode;
 };
@@ -174,10 +174,12 @@ void TernaryTree::FuzzyFind(
 }
 
 // ExtrapolateAll
-// Extrapolate all possibilities from an input strung.
+// Extrapolate all possibilities from an input string.
 //
 // @In:   pNode pointer to starting node
 //        pWords vector of words
+//        associative map of words
+//        accumulator
 // @Out:  at least one match found
 //        pWords filled with words from starting node
 bool TernaryTree::ExtrapolateAll(
@@ -188,13 +190,12 @@ bool TernaryTree::ExtrapolateAll(
     const char *pWord)
 {
   if (pNode) {
-    Extrapolate(pNode, pNode->GetCenter(), pWords, accum, pStem, pWord);
+    Extrapolate(pNode, pNode->GetCenter(), pWords, accum, pStem, pWord, 6);
     return true;
   }
   else
     return false;
 }
-
 
 // Extrapolate
 // Extrapolate from a word stem.
@@ -215,7 +216,9 @@ bool TernaryTree::Extrapolate(
     std::deque< UCHAR > *accum,
     const char *pStem,
     const char *pWord,
-    int depth)
+    const int max_diff,
+    int depth
+    )
 {
   if (!pNode)
     return false;
@@ -226,15 +229,14 @@ bool TernaryTree::Extrapolate(
   // Is this the end of a full word, ergo "o" in "piano"?
   if (pNode->GetTerminator()) {
     VERBOSE_LOG(LOG_DEBUG,  "TERMINATOR: " << pNode << std::endl);
-    std::string word, compound;
+    std::string word ;
     TNode *pCur = pNode;
     while (pCur != pRoot && pCur) {
       // Push this node's key onto our candidate accumulator
       accum->push_front(pCur->GetKey());
       pCur = pCur->GetParent();
     }
-    // Reverse stack.
-    // NOTE: this could be more efficient with a deque
+    // Reverse the word
     auto commit = *accum;
     while (!commit.empty()) {
       VERBOSE_LOG(LOG_DEBUG,  commit.front());
@@ -243,14 +245,20 @@ bool TernaryTree::Extrapolate(
     }
     VERBOSE_LOG(LOG_DEBUG,  std::endl);
 
+    std::string compound;
     compound = pStem;
     compound = compound.substr(0, compound.length());
-    compound += "|";
     compound += word;
     VERBOSE_LOG(LOG_DEBUG,  "ADDING " << compound.c_str() << std::endl);
 
-    // print the score out here for now.
     int score = CalcLevenshtein(pWord, compound.c_str());
+
+    // If the Levenshtein distance exceeds our variance threshold, discontinue.
+    if (max_diff && score > max_diff) {
+      accum->clear();
+      return false;
+    }
+
     // Note: limit of 64 ties.
     int tieBreaker = 0;
     while ((pWords)->count(tieBreaker + (score << 6)) != 0)
@@ -262,7 +270,7 @@ bool TernaryTree::Extrapolate(
 
   // Recurse
   if ((pChild = pNode->GetLeft())) {
-    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, depth + 1)) {
+    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, max_diff, depth + 1)) {
       ret |= true;
       if (!accum->empty() &&
           !pChild->GetLeft() && !pChild->GetCenter() && !pChild->GetRight())
@@ -272,7 +280,7 @@ bool TernaryTree::Extrapolate(
   }
 
   if ((pChild = pNode->GetCenter())) {
-    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, depth + 1)) {
+    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, max_diff, depth + 1)) {
       ret |= true;
       if ((!accum->empty() &&
             !pChild->GetLeft() && !pChild->GetCenter() && !pChild->GetRight())) {
@@ -281,7 +289,7 @@ bool TernaryTree::Extrapolate(
   }
 
   if ((pChild = pNode->GetRight())) {
-    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, depth + 1)) {
+    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, max_diff, depth + 1)) {
       ret |= true;
       if ((!accum->empty() &&
             !pChild->GetLeft() && !pChild->GetCenter() && !pChild->GetRight())) {
@@ -291,7 +299,6 @@ bool TernaryTree::Extrapolate(
 
   return ret;
 }
-
 
 // AllocNode
 // Insert a node into the tree

@@ -62,59 +62,19 @@ class TernaryTree {
  public:
   TernaryTree() {};
   ~TernaryTree() {};
-
-  // insertNode
-  // insert a node into the tree
-  //
-  // @In: pWord pointer to null-terminated string
-  // ppParent pointer to parent pointer
-  // @Out: Node *
   TNode * Insert(const char *pWord, TNode **ppNode = NULL);
-  // find
-  // find a word
-  //
-  // @In:     @pWord pointer to null-terminated string
-  //          @pParent pointer to current parent node
-  //          @ppTerminal pointer to terminal node pointer
-  // @Out:    true == match found
   bool Find(const char *pWord, TNode *pParent, TNode ** ppTerminal = NULL);
-
-  // Perform an inexact, "fuzzy" lookup of a word
-  //
-  // @In:     @pWord pointer to null-terminated string
-  //          @pParent pointer to current parent node
-  // @Out:    true == match found
-  //          @map key/value pair map with tiebroken score and word
   void FuzzyFind(
     const char *pWord,
     TNode *pParent,
     std::map< int, std::string > *pWords);
- // extrapolateAll
-  // extrapolate all possibilities from an input strung.
-  //
-  // @In: pNode pointer to starting node
-  // pVect vector of words
-  // @Out: -
-  // pVect filled with words from starting node
   bool ExtrapolateAll(
     TNode *pNode,
     std::map< int, std::string > *pWords,
     std::deque< UCHAR > *accum,
     const char *pStem,
-    const char *pWord);
-
-  // extrapolate
-  // extrapolate from a word stem.
-  //
-  // I selected a deque as my accumulator data structure. A stack
-  // requires a second stack or some other means of word reversal,
-  // while a deque gives me both FIFO representation and FILO
-  // functionality.
-  //
-  // @In:     pNode pointer to starting node
-  //          pVect vector of words
-  // @Out:    -
-  //          pVect filled with words from starting node
+    const char *pWord
+    );
   bool Extrapolate(
     TNode *pRoot,
     TNode *pNode,
@@ -122,25 +82,9 @@ class TernaryTree {
     std::deque< UCHAR > *accum,
     const char *pStem,
     const char *pWord,
+    const int max_diff = 0,
     int depth = 0);
-
  protected:
-  // allocNode
-  // insert a node into the tree
-  //
-  // @In: key key of node to add
-  // @Out: Pointer to node
   TNode *AllocNode(char key);
-
-  // Utility preprocessor macro for Levenshtein
-
-  // getLevenshtein
-  // This is an optimized Levenshtein string distance calculation.
-  // It returns how "different" two strings are, effectively performing
-  // a commutative subtraction operation.
-  //
-  // @In: s1 string #1
-  // s2 string #2
-  // @Out: Levenshtein difference
   int CalcLevenshtein(const char *s1, const char *s2);
 };
