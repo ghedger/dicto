@@ -147,7 +147,7 @@ void TernaryTree::FuzzyFind(
 {
   std::string word = pWord;
   TNode *pNode = NULL;
-  while (word.length() > 1)
+  while (word.length() > 0)
   {
     VERBOSE_LOG(LOG_INFO,  "SEARCHING " << word.c_str() << "(" << pWord << ")" << std::endl);
     if (Find(word.c_str(), pParent, &pNode)) {
@@ -259,11 +259,15 @@ bool TernaryTree::Extrapolate(
       return false;
     }
 
-    // Note: limit of 64 ties.
+    // Note: limit of 4096 ties.
     int tieBreaker = 0;
-    while ((pWords)->count(tieBreaker + (score << 6)) != 0)
+    while ((pWords)->count(tieBreaker + (score << 12)) != 0) {
       tieBreaker++;
-    (*pWords)[ tieBreaker + (score << 6)] = compound;
+      if( tieBreaker > tie_hwm_ ) {
+        tie_hwm_ = tieBreaker;
+      }
+    }
+    (*pWords)[ tieBreaker + (score << 12)] = compound;
     VERBOSE_LOG(LOG_DEBUG,  "SCORING " << pWord << " =|= " << compound.c_str() << " SCORE: " << score << std::endl);
     accum->clear();
   }

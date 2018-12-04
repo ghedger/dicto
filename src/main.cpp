@@ -289,12 +289,16 @@ int main(int argc, const char *argv[])
     if (!extrapolation.empty()) {
       std::cout << "SUGGESTIONS:" << std::endl;
       for (auto it : extrapolation) {
-        std::cout << "(" << (((it).first) >> 6) << ") ";
+        std::cout << "(" << (((it).first) >> 12) << ") ";
         std::cout << ((it).second.c_str()) << std::endl;
       }
     } else {
       std::cout << "NO SUGGESTION..." << std::endl;
     }
+
+    std::cout << "MAX TIES: " << t.GetMaxTies() << std::endl;
+    t.ClearMaxTies();
+
   }
   return 0;
 }

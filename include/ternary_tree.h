@@ -60,7 +60,7 @@ class TNode : public TemplNode <UCHAR, TNode> {
 // with a yes/no response.
 class TernaryTree {
  public:
-  TernaryTree() {};
+  TernaryTree() { tie_hwm_ = 0; };
   ~TernaryTree() {};
   TNode * Insert(const char *pWord, TNode **ppNode = NULL);
   bool Find(const char *pWord, TNode *pParent, TNode ** ppTerminal = NULL);
@@ -84,7 +84,13 @@ class TernaryTree {
     const char *pWord,
     const int max_diff = 0,
     int depth = 0);
+
+ int GetMaxTies() { return tie_hwm_; }
+ void ClearMaxTies() { tie_hwm_ = 0; }
  protected:
   TNode *AllocNode(char key);
   int CalcLevenshtein(const char *s1, const char *s2);
+
+  // member variables
+  int tie_hwm_;
 };
