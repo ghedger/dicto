@@ -136,6 +136,7 @@ void PrintUsage()
   std::cout << "dicto [flags]:" << std::endl;
   std::cout << "Flags:" << std::endl;
   std::cout << "\t-v set verbosity: -v0 none -v1 info -v2 debug" << std::endl;
+  std::cout << "\t-d set maximum Levenshtein distance, example -d18" << std::endl;
 }
 
 // LEG is used for PrintTraversal to tell what leg the current node is on.
@@ -252,6 +253,18 @@ int main(int argc, const char *argv[])
               }
             }
             break;
+          case 'd':
+            {
+              unsigned int diff;
+              sscanf(&argv[i][2], "%d", &diff);
+              if (diff > 0 && diff < (unsigned int) ~0) {
+                std::cout << diff << std::endl;
+                t.SetMaxDifference( (int) diff);
+              }
+            }
+            break;
+
+
           default:
             PrintUsage();
             return 1;
@@ -296,7 +309,7 @@ int main(int argc, const char *argv[])
       std::cout << "NO SUGGESTION..." << std::endl;
     }
 
-    std::cout << "MAX TIES: " << t.GetMaxTies() << std::endl;
+    VERBOSE_LOG(LOG_INFO, "MAX TIES: " << t.GetMaxTies() << std::endl);
     t.ClearMaxTies();
 
   }

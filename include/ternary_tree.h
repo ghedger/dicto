@@ -60,7 +60,10 @@ class TNode : public TemplNode <UCHAR, TNode> {
 // with a yes/no response.
 class TernaryTree {
  public:
-  TernaryTree() { tie_hwm_ = 0; };
+  TernaryTree() {
+    tie_hwm_ = 0;
+    max_diff_ = 10;
+  };
   ~TernaryTree() {};
   TNode * Insert(const char *pWord, TNode **ppNode = NULL);
   bool Find(const char *pWord, TNode *pParent, TNode ** ppTerminal = NULL);
@@ -82,15 +85,19 @@ class TernaryTree {
     std::deque< UCHAR > *accum,
     const char *pStem,
     const char *pWord,
+    std::map< int, int > *tie_breaker_lookup,
     const int max_diff = 0,
     int depth = 0);
 
  int GetMaxTies() { return tie_hwm_; }
  void ClearMaxTies() { tie_hwm_ = 0; }
+ void SetMaxDifference(int max) { max_diff_ = max; }
+ int GetMaxDifference() { return max_diff_; }
  protected:
   TNode *AllocNode(char key);
   int CalcLevenshtein(const char *s1, const char *s2);
 
   // member variables
   int tie_hwm_;
+  int max_diff_;
 };

@@ -51,39 +51,39 @@ typedef unsigned char UCHAR;
 // InsertNode
 // Insert a node into the tree
 //
-// @In: pWord pointer to null-terminated string
+// @In: word pointer to null-terminated string
 // ppParent pointer to parent pointer
 // @Out: Node *
-TNode * TernaryTree::Insert(const char *pWord, TNode **ppNode)
+TNode * TernaryTree::Insert(const char *word, TNode **ppNode)
 {
   TNode * pChild = NULL;
   VERBOSE_LOG(LOG_DEBUG, "Insert >>>>>" << std::endl);
   if (!(*ppNode)) {
-    *ppNode = AllocNode(*pWord);
+    *ppNode = AllocNode(*word);
     VERBOSE_LOG(LOG_DEBUG, "ALLOC" << std::endl);
   }
-  if (tolower(*pWord) < ((*ppNode)->GetKey())) {
-    VERBOSE_LOG(LOG_DEBUG,  "L: " << pWord);
-    Insert(pWord, &((*ppNode)->l_));
+  if (tolower(*word) < ((*ppNode)->GetKey())) {
+    VERBOSE_LOG(LOG_DEBUG,  "L: " << word);
+    Insert(word, &((*ppNode)->l_));
     (*ppNode)->GetLeft()->SetParent((*ppNode)->GetParent());
   }
-  else if (tolower(*pWord) > (*ppNode)->GetKey()) {
-    VERBOSE_LOG(LOG_DEBUG,  "R: " << pWord << std::endl);
+  else if (tolower(*word) > (*ppNode)->GetKey()) {
+    VERBOSE_LOG(LOG_DEBUG,  "R: " << word << std::endl);
     // Add a peer on the right
-    Insert(pWord, &((*ppNode)->r_));
+    Insert(word, &((*ppNode)->r_));
     (*ppNode)->GetRight()->SetParent((*ppNode)->GetParent());
   } else {
     // Is this the last letter (is there a char in the second position?)
-    if (pWord[ 1 ])
+    if (word[ 1 ])
     {
-      VERBOSE_LOG(LOG_DEBUG,  "C: " << pWord << std::endl);
-      pChild = Insert(pWord + 1, &((*ppNode)->c_));
+      VERBOSE_LOG(LOG_DEBUG,  "C: " << word << std::endl);
+      pChild = Insert(word + 1, &((*ppNode)->c_));
       pChild->SetParent(*ppNode);
     }
     else
     {
       // Yep, last one...
-      VERBOSE_LOG(LOG_DEBUG,  "T: " << pWord << std::endl);
+      VERBOSE_LOG(LOG_DEBUG,  "T: " << word << std::endl);
       (*ppNode)->SetTerminator();
     }
   }
@@ -106,29 +106,29 @@ TNode * TernaryTree::Insert(const char *pWord, TNode **ppNode)
 // Find
 // Find a word
 //
-// @In:     @pWord pointer to null-terminated string
+// @In:     @word pointer to null-terminated string
 //          @pParent pointer to current parent node
 //          @ppTerminal pointer to terminal node pointer
 // @Out:    true == match found
-bool TernaryTree::Find(const char *pWord, TNode *pParent, TNode ** ppTerminal)
+bool TernaryTree::Find(const char *word, TNode *pParent, TNode ** ppTerminal)
 {
   bool ret = false;
   if (pParent)
   {
-    if ((*pWord) < pParent->GetKey())
-      ret = Find(pWord, pParent->GetLeft(), ppTerminal);
-    else if ((*pWord) > pParent->GetKey())
-      ret = Find(pWord, pParent->GetRight(), ppTerminal);
+    if ((*word) < pParent->GetKey())
+      ret = Find(word, pParent->GetLeft(), ppTerminal);
+    else if ((*word) > pParent->GetKey())
+      ret = Find(word, pParent->GetRight(), ppTerminal);
     else
     {
-      if ('\0' == pWord[ 1 ])
+      if ('\0' == word[ 1 ])
       {
         ret = pParent->GetTerminator();
         if (ppTerminal) // Mark pointer to node
           *ppTerminal = pParent;
       }
       else
-        ret = Find(pWord + 1, pParent->GetCenter(), ppTerminal);
+        ret = Find(word + 1, pParent->GetCenter(), ppTerminal);
     }
   }
   return ret;
@@ -136,61 +136,62 @@ bool TernaryTree::Find(const char *pWord, TNode *pParent, TNode ** ppTerminal)
 
 // Perform an inexact, "fuzzy" lookup of a word
 //
-// @In:     @pWord pointer to null-terminated string
+// @In:     @word pointer to null-terminated string
 //          @pParent pointer to current parent node
 // @Out:    true == match found
 //          @map key/value pair map with tiebroken score and word
 void TernaryTree::FuzzyFind(
-    const char *pWord,
+    const char *word,
     TNode *pParent,
-    std::map< int, std::string > *pWords)
+    std::map< int, std::string > *words)
 {
-  std::string word = pWord;
-  TNode *pNode = NULL;
-  while (word.length() > 0)
+  std::string search_word = word;
+  TNode *node = NULL;
+  while (search_word.length() > 0)
   {
-    VERBOSE_LOG(LOG_INFO,  "SEARCHING " << word.c_str() << "(" << pWord << ")" << std::endl);
-    if (Find(word.c_str(), pParent, &pNode)) {
-      (*pWords)[0] = word.c_str();
+    VERBOSE_LOG(LOG_INFO,  "SEARCHING " << search_word.c_str() << "(" << word << ")" << std::endl);
+    if (Find(search_word.c_str(), pParent, &node)) {
+      (*words)[0] = search_word.c_str();
       break;
     }
-    if (pNode)
+    if (node)
       break;
 
-    VERBOSE_LOG(LOG_INFO,  "NO \"" << word.c_str() << "\" found; ");
+    VERBOSE_LOG(LOG_INFO,  "NO \"" << search_word.c_str() << "\" found; ");
 
-    word = word.substr(0, word.length() - 1);
-    VERBOSE_LOG(LOG_INFO,  "TRYING: " << word.c_str() << "(" << pWord << ")" << std::endl);
+    search_word = search_word.substr(0, search_word.length() - 1);
+    VERBOSE_LOG(LOG_INFO,  "TRYING: " << search_word.c_str() << "(" << word << ")" << std::endl);
   }
 
   // now Extrapolate and score possibilities from stem
-  if (pNode)
+  if (node)
   {
     std::deque< UCHAR > accum;
     //                accum.resize(1 << 16);
-    VERBOSE_LOG(LOG_INFO,  "TRYING " << word.c_str() << "(" << pWord << ")" << std::endl);
-    ExtrapolateAll(pNode, pWords, &accum, word.c_str(), pWord);
+    VERBOSE_LOG(LOG_INFO,  "TRYING " << search_word.c_str() << "(" << word << ")" << std::endl);
+    ExtrapolateAll(node, words, &accum, search_word.c_str(), word);
   }
 }
 
 // ExtrapolateAll
 // Extrapolate all possibilities from an input string.
 //
-// @In:   pNode pointer to starting node
-//        pWords vector of words
+// @In:   node pointer to starting node
+//        words vector of words
 //        associative map of words
 //        accumulator
 // @Out:  at least one match found
-//        pWords filled with words from starting node
+//        words filled with words from starting node
 bool TernaryTree::ExtrapolateAll(
-    TNode *pNode,
-    std::map< int, std::string > *pWords,
+    TNode *node,
+    std::map< int, std::string > *words,
     std::deque< UCHAR > *accum,
-    const char *pStem,
-    const char *pWord)
+    const char *stem,
+    const char *word)
 {
-  if (pNode) {
-    Extrapolate(pNode, pNode->GetCenter(), pWords, accum, pStem, pWord, 6);
+  std::map<int,int> tie_breaker_lookup;
+  if (node) {
+    Extrapolate(node, node->GetCenter(), words, accum, stem, word, &tie_breaker_lookup, max_diff_);
     return true;
   }
   else
@@ -205,76 +206,93 @@ bool TernaryTree::ExtrapolateAll(
 // while a deque gives me both FIFO representation and FILO
 // functionality.
 //
-// @In:     pNode pointer to starting node
-//          pWords map of words, keyed by score
+// @In:     node pointer to starting node
+//          words map of words, keyed by score
 // @Out:    true == match found
 //          pVect filled with words from starting node
 bool TernaryTree::Extrapolate(
-    TNode *pRoot,
-    TNode *pNode,
-    std::map< int, std::string > *pWords,
+    TNode *root,
+    TNode *node,
+    std::map< int, std::string > *words,
     std::deque< UCHAR > *accum,
-    const char *pStem,
-    const char *pWord,
+    const char *stem,
+    const char *word,
+    std::map< int, int > *tie_breaker_lookup,
     const int max_diff,
     int depth
     )
 {
-  if (!pNode)
+  if (!node)
     return false;
 
   TNode *pChild = NULL;
   bool ret = false;
 
   // Is this the end of a full word, ergo "o" in "piano"?
-  if (pNode->GetTerminator()) {
-    VERBOSE_LOG(LOG_DEBUG,  "TERMINATOR: " << pNode << std::endl);
-    std::string word ;
-    TNode *pCur = pNode;
-    while (pCur != pRoot && pCur) {
+  if (node->GetTerminator()) {
+    VERBOSE_LOG(LOG_DEBUG,  "TERMINATOR: " << node << std::endl);
+    std::string search_word;
+    TNode *pCur = node;
+    while (pCur != root && pCur) {
       // Push this node's key onto our candidate accumulator
       accum->push_front(pCur->GetKey());
       pCur = pCur->GetParent();
     }
-    // Reverse the word
+    // Reverse the search_word
     auto commit = *accum;
     while (!commit.empty()) {
       VERBOSE_LOG(LOG_DEBUG,  commit.front());
-      word.push_back(commit.front());
+      search_word.push_back(commit.front());
       commit.pop_front();
     }
     VERBOSE_LOG(LOG_DEBUG,  std::endl);
 
     std::string compound;
-    compound = pStem;
+    compound = stem;
     compound = compound.substr(0, compound.length());
-    compound += word;
+    compound += search_word;
     VERBOSE_LOG(LOG_DEBUG,  "ADDING " << compound.c_str() << std::endl);
 
-    int score = CalcLevenshtein(pWord, compound.c_str());
+    int score = CalcLevenshtein(word, compound.c_str());
 
-    // If the Levenshtein distance exceeds our variance threshold, discontinue.
+    // If the Levenshtein distance exceeds our variance threshold,
+    // discontinue and unwind.
     if (max_diff && score > max_diff) {
       accum->clear();
       return false;
     }
 
-    // Note: limit of 4096 ties.
-    int tieBreaker = 0;
-    while ((pWords)->count(tieBreaker + (score << 12)) != 0) {
-      tieBreaker++;
-      if( tieBreaker > tie_hwm_ ) {
-        tie_hwm_ = tieBreaker;
+    // Is this the first search_word with this levenshtein distance from the stem?
+    // If so populate the key.  If not, use the current tie count.
+    // We will keep a lookup table keyed by score containing the total #
+    // of items with this score.
+    // This operation is faster than the previous O ( (n^2) / 2 + n/2 ) of
+    // iterating through words->count(tie_breaker + (score << shift)) until
+    // we find an empty spot.
+    // Note: limit of 4096 ties!
+    int tie_breaker = 0;
+    if (!((*tie_breaker_lookup).count(score))) {
+      // Set this score-keyed lookup entry to the next distance to use
+      (*tie_breaker_lookup)[ score ] = 0;
+    } else {
+      (*tie_breaker_lookup)[ score ] = (*tie_breaker_lookup)[ score ] + 1;
+      tie_breaker = (*tie_breaker_lookup)[ score ];
+      if( tie_breaker > tie_hwm_ ) {   // update tie high-watermark
+        tie_hwm_ = tie_breaker;
       }
     }
-    (*pWords)[ tieBreaker + (score << 12)] = compound;
-    VERBOSE_LOG(LOG_DEBUG,  "SCORING " << pWord << " =|= " << compound.c_str() << " SCORE: " << score << std::endl);
+
+    //while ((words)->count(tie_breaker + (score << 12)) != 0) {
+    //  tie_breaker++;
+    //}
+    (*words)[ tie_breaker + (score << 12)] = compound;
+    VERBOSE_LOG(LOG_DEBUG,  "SCORING " << word << " =|= " << compound.c_str() << " SCORE: " << score << std::endl);
     accum->clear();
   }
 
   // Recurse
-  if ((pChild = pNode->GetLeft())) {
-    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, max_diff, depth + 1)) {
+  if ((pChild = node->GetLeft())) {
+    if (Extrapolate(root, pChild, words, accum, stem, word, tie_breaker_lookup, max_diff, depth + 1)) {
       ret |= true;
       if (!accum->empty() &&
           !pChild->GetLeft() && !pChild->GetCenter() && !pChild->GetRight())
@@ -283,8 +301,8 @@ bool TernaryTree::Extrapolate(
     }
   }
 
-  if ((pChild = pNode->GetCenter())) {
-    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, max_diff, depth + 1)) {
+  if ((pChild = node->GetCenter())) {
+    if (Extrapolate(root, pChild, words, accum, stem, word, tie_breaker_lookup, max_diff, depth + 1)) {
       ret |= true;
       if ((!accum->empty() &&
             !pChild->GetLeft() && !pChild->GetCenter() && !pChild->GetRight())) {
@@ -292,8 +310,8 @@ bool TernaryTree::Extrapolate(
     }
   }
 
-  if ((pChild = pNode->GetRight())) {
-    if (Extrapolate(pRoot, pChild, pWords, accum, pStem, pWord, max_diff, depth + 1)) {
+  if ((pChild = node->GetRight())) {
+    if (Extrapolate(root, pChild, words, accum, stem, word, tie_breaker_lookup, max_diff, depth + 1)) {
       ret |= true;
       if ((!accum->empty() &&
             !pChild->GetLeft() && !pChild->GetCenter() && !pChild->GetRight())) {
@@ -311,10 +329,10 @@ bool TernaryTree::Extrapolate(
 // @Out: Pointer to node
 TNode *TernaryTree::AllocNode(char key)
 {
-  TNode *pNode = new TNode(key);
-  assert(pNode);
-  pNode->SetKey(key);
-  return pNode;
+  TNode *node = new TNode(key);
+  assert(node);
+  node->SetKey(key);
+  return node;
 }
 
 // Utility preprocessor macro for Levenshtein
