@@ -167,7 +167,9 @@ void TernaryTree::FuzzyFind(
   if (node)
   {
     std::deque< UCHAR > accum;
-    //                accum.resize(1 << 16);
+    if (word != search_word) {
+      VERBOSE_LOG(LOG_NONE,  "NO EXACT MATCH; NEAREST STEM: " << search_word.c_str() << "(ORIGINAL: " << word << ")" << std::endl);
+    }
     VERBOSE_LOG(LOG_INFO,  "TRYING " << search_word.c_str() << "(" << word << ")" << std::endl);
     ExtrapolateAll(node, words, &accum, search_word.c_str(), word);
   }
