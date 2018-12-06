@@ -10,7 +10,7 @@ INCDIR      := include
 BUILDDIR    := build
 TARGETDIR   := bin
 RESDIR      := res
-SRCEXT      := cpp
+SRCEXT      := cc
 DEPEXT      := d
 OBJEXT      := o
 
