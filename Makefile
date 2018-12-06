@@ -7,7 +7,7 @@ TARGET      := dicto
 #The Directories, Source, Includes, Objects, Binary and Resources
 SRCDIR      := src
 INCDIR      := include
-BUILDDIR    := obj
+BUILDDIR    := build
 TARGETDIR   := bin
 RESDIR      := res
 SRCEXT      := cpp
